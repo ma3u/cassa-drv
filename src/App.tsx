@@ -16,9 +16,7 @@ import {
   Database, 
   Network, 
   Clock, 
-  Lock,
   ChartBar,
-  Handshake,
   AlertTriangle,
   Users,
   FileText,
@@ -27,45 +25,32 @@ import {
   TrendingUp,
   Zap,
   Eye,
-  Play,
   ArrowDown,
   Scale,
   Globe,
   BookOpen,
   ShieldCheck,
-  Fingerprint,
   Landmark,
   ScrollText,
-  Workflow
+  Workflow,
+  MessageSquare,
+  Search,
+  GitCompare,
+  XCircle,
+  CircleCheck,
+  Bot,
+  Layers,
+  Link2,
 } from "lucide-react"
-import { useState, useEffect, useRef, useCallback } from "react"
-import { PoliceKnowledgeGraph3D } from "@/components/PoliceKnowledgeGraph3D"
+import { useState, useEffect, useRef } from "react"
+import { DRVKnowledgeGraph3D } from "@/components/DRVKnowledgeGraph3D"
 
 function App() {
   const [selectedLayer, setSelectedLayer] = useState<number | null>(null)
   const [activeScenario, setActiveScenario] = useState<number>(0)
   const [showIntroGuide, setShowIntroGuide] = useState<boolean>(true)
-  const [isPlayingNarration, setIsPlayingNarration] = useState(false)
   const architectureRef = useRef<HTMLDivElement>(null)
-  const narrationAudioRef = useRef<HTMLAudioElement | null>(null)
 
-  const toggleNarration = useCallback(() => {
-    if (isPlayingNarration) {
-      if (narrationAudioRef.current) {
-        narrationAudioRef.current.pause()
-        narrationAudioRef.current.currentTime = 0
-      }
-      setIsPlayingNarration(false)
-      return
-    }
-    const audio = new Audio(`${import.meta.env.BASE_URL}audio/hydra_briefing.mp3`)
-    audio.onended = () => setIsPlayingNarration(false)
-    audio.onerror = () => setIsPlayingNarration(false)
-    narrationAudioRef.current = audio
-    audio.play()
-    setIsPlayingNarration(true)
-  }, [isPlayingNarration])
-  
   const { scrollYProgress } = useScroll()
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0.3])
 
@@ -78,136 +63,233 @@ function App() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // ────────────────────────────────────────────
+  // Data: Challenges
+  // ────────────────────────────────────────────
   const challenges = [
     {
-      icon: Network,
-      title: "Organisierte Kriminalität & Cybercrime",
-      stat: "2,7 Mrd. €",
-      statLabel: "Schaden 2023",
-      description: "Schadensumme durch Organisierte Kriminalität erreichte 2023 einen Höchstwert – mit steigender Tendenz bei Cyberkriminalität.",
-      trend: "+120%",
-      color: "oklch(0.55 0.22 25)"
+      icon: ScrollText,
+      title: "Komplexe Gesetzeslandschaft",
+      stat: "5+",
+      statLabel: "Sozialgesetzbücher",
+      description: "SGB I, IV, VI, IX, X — über 870 Paragraphen bilden die Rechtsgrundlage der gesetzlichen Rentenversicherung. Querverweise, Übergangsregelungen und Sonderfälle machen die Anwendung hochkomplex.",
+      trend: "870+ §§",
+      color: "oklch(0.45 0.15 245)"
     },
     {
-      icon: Database,
-      title: "Datensilos & föderale Fragmentierung",
-      stat: "20",
-      statLabel: "Polizeien",
-      description: "Heterogene IT-Landschaft erschwert bundesländerübergreifenden Datenaustausch und effiziente Ermittlungsarbeit.",
-      trend: "320k",
-      color: "oklch(0.45 0.12 240)"
-    },
-    {
-      icon: FileText,
-      title: "Rechtliche Rahmenbedingungen",
-      stat: "BVerfG",
-      statLabel: "Urteil 2023",
-      description: "Höhere Hürden für automatisierte Datenanalyse bei gleichzeitigem Beschleunigungsgrundsatz in Strafverfahren.",
-      trend: "Neu",
-      color: "oklch(0.25 0.05 250)"
+      icon: Clock,
+      title: "Bearbeitungszeiten & Rückstände",
+      stat: "3–6",
+      statLabel: "Monate Bearbeitungszeit",
+      description: "Rentenanträge durchlaufen aufwändige Prüfungen: Kontenklärung, Wartezeitberechnung, Entgeltpunkte. Mitarbeitende müssen Dutzende Querverweise manuell prüfen.",
+      trend: "Ziel: <3 Mon.",
+      color: "oklch(0.55 0.20 55)"
     },
     {
       icon: Users,
-      title: "Personalmangel & Überlastung",
-      stat: "320k",
-      statLabel: "Beschäftigte",
-      description: "Polizeibeschäftigte bewältigen exponentiell wachsende Datenmengen – KI als Multiplikator menschlicher Expertise.",
+      title: "Fachkräftemangel & Wissenstransfer",
+      stat: "56.000",
+      statLabel: "DRV-Beschäftigte",
+      description: "Erfahrene Sachbearbeiter gehen in den Ruhestand — ihr implizites Wissen über Sonderfälle, GRA-Anweisungen und Berechnungsdetails lässt sich kaum dokumentieren.",
       trend: "Kritisch",
-      color: "oklch(0.55 0.18 200)"
+      color: "oklch(0.50 0.18 25)"
+    },
+    {
+      icon: Link2,
+      title: "Gesetzesübergreifende Abhängigkeiten",
+      stat: "100+",
+      statLabel: "Querverweise",
+      description: "SGB VI verweist auf SGB IV (Versicherungspflicht), SGB X (Verwaltungsverfahren), SGB IX (Rehabilitation). Fehler bei Querverweisen führen zu falschen Bescheiden.",
+      trend: "Komplex",
+      color: "oklch(0.45 0.12 200)"
     }
   ]
 
+  // ────────────────────────────────────────────
+  // Data: 4-Layer Ontology (DRV)
+  // ────────────────────────────────────────────
   const layers = [
     {
       number: 1,
       title: "Normative Schicht",
-      subtitle: "Das strukturelle Skelett",
-      description: "Hierarchie der Rechtsquellen vom EU-Recht bis zu Dienstvorschriften. Das System versteht Normenhierarchien und traversiert sie konsistent.",
+      subtitle: "Gesetzeshierarchie",
+      description: "Hierarchie der Rechtsquellen: EU-Recht → Grundgesetz → Sozialgesetzbücher → Rechtsverordnungen → GRA-Anweisungen. Das System versteht die Normenhierarchie und traversiert sie konsistent.",
       icon: Shield,
-      color: "oklch(0.25 0.05 250)",
-      examples: ["EU-Recht", "Grundgesetz", "StPO", "Landespolizeigesetze"]
+      color: "oklch(0.35 0.12 245)",
+      examples: ["SGB I–XII", "GRA-Anweisungen", "EU-DSGVO", "Rechtsverordnungen"]
     },
     {
       number: 2,
       title: "Zeitliche Dimension",
-      subtitle: "Validität & Versionierung",
-      description: "Zeitliche Gültigkeit jeder Rechtsgrundlage. Automatische Prüfung welche Gesetzesfassung zum Tatzeitpunkt galt und korrekte Fristberechnung.",
+      subtitle: "Validität & Übergangsregelungen",
+      description: "Zeitliche Gültigkeit jeder Rechtsgrundlage: Übergangsregelungen (§235 SGB VI), stufenweise Anhebung der Altersgrenze, Rentenanpassungen zum 1. Juli. Das System kennt die korrekte Fassung zu jedem Stichtag.",
       icon: Clock,
-      color: "oklch(0.45 0.12 240)",
-      examples: ["Verjährungsfristen", "Gesetzesänderungen", "Haftprüfungen", "TKÜ-Verlängerungen"]
+      color: "oklch(0.45 0.15 200)",
+      examples: ["Regelaltersgrenze 65→67", "Mütterrente Erweiterung", "Rentenanpassung 2025", "Beitragssätze"]
     },
     {
       number: 3,
-      title: "Prozedurale Zustandsmaschine",
-      subtitle: "Die Prozessdimension",
-      description: "Ermittlungsverfahren als formale Prozesse mit definierten Zuständen, Übergängen und Fristen. Proaktive Vorschläge für nächste Schritte.",
+      title: "Prozedurale Schicht",
+      subtitle: "Geschäftsprozesse & Workflows",
+      description: "DRV-Geschäftsprozesse als formale Abläufe: Rentenantrag, Kontenklärung, EM-Prüfung, Reha-Bewilligung. Proaktive Vorschläge für nächste Schritte und Fristüberwachung.",
       icon: ChartBar,
-      color: "oklch(0.55 0.18 200)",
-      examples: ["Verfahrenszustände", "Prozessübergänge", "Fristüberwachung", "SOPs"]
+      color: "oklch(0.50 0.18 160)",
+      examples: ["Rentenantrag", "EM-Prüfung", "Reha vor Rente", "Widerspruchsverfahren"]
     },
     {
       number: 4,
       title: "Fallbezogener Overlay",
-      subtitle: "Die Faktendimension",
-      description: "Konkrete Fakten eines Ermittlungsvorgangs: Personen, Beweismittel, Zeugenaussagen, Kommunikationsdaten im Kontext der Normenhierarchie.",
+      subtitle: "Versichertenkontext",
+      description: "Konkreter Versicherungsfall: Beitragszeiten, Entgeltpunkte, Kindererziehungszeiten, medizinische Gutachten. Alle Daten im Kontext der Normenhierarchie und Geschäftsregeln.",
       icon: Database,
-      color: "oklch(0.55 0.22 25)",
-      examples: ["Personen", "Beweismittel", "Kommunikation", "Ortsdaten"]
+      color: "oklch(0.55 0.20 55)",
+      examples: ["Entgeltpunkte", "Wartezeiten", "Kindererziehung", "Gutachten"]
     }
   ]
 
+  // ────────────────────────────────────────────
+  // Data: Scenarios (from DRV_DEMO_PLAN §4)
+  // ────────────────────────────────────────────
   const scenarios = [
     {
-      title: "Organisierte Kriminalität",
-      description: "Analyse komplexer OK-Strukturen mit Geldwäsche, Drogenhandel und Menschenschmuggel über Ländergrenzen hinweg.",
+      title: "Compliance-Analyse",
+      description: "Schnell die bindende Geschäftsregel für einen Leistungstyp finden und gegen den Quell-Paragraphen verifizieren — z. B. Regelaltersrente (§35 SGB VI) mit allen Querverweisen.",
       benefits: [
-        "Automatische Verknüpfung von Personen, Firmen und Konten im Knowledge Graph",
-        "Prüfung der Rechtsgrundlagen unter Berücksichtigung aktueller BVerfG-Anforderungen",
-        "Proaktive Warnungen vor ablaufenden Fristen",
-        "Graph-Algorithmen identifizieren versteckte Netzwerkverbindungen"
+        "Automatische Auflösung aller Querverweise: §35 → §50 (Wartezeit) → §235 (Altersgrenze) → §56 (Kindererziehung)",
+        "Chatbot mit Graph-Kontext: Frage stellen und Antwort mit §-Zitaten erhalten",
+        "GRA-Anweisungen direkt verlinkt: Von der Geschäftsregel zur Handlungsanweisung in einem Klick",
+        "Automatische Prüfung gegen aktuelle Gesetzeslage — kein Risiko veralteter Informationen"
       ],
-      icon: Network,
-      color: "oklch(0.55 0.22 25)",
-      impact: "2 Billionen USD weltweit gewaschen jährlich"
+      icon: FileText,
+      color: "oklch(0.45 0.15 245)",
+      impact: "Sachbearbeiter Recht: Recherche von Stunden auf Sekunden"
     },
     {
-      title: "Cybercrime-Ermittlungen",
-      description: "Aufklärung von Ransomware-Angriffen mit IT-Forensik, Server-Logs, Blockchain-Analyse und Darknet-Kommunikation.",
+      title: "Prozess-Engineering",
+      description: "Geschäftsregeln auf DRV-Prozesse abbilden — z. B. den Rentenantragsprozess von der Antragstellung bis zum Bescheid mit allen Abhängigkeiten visualisieren.",
       benefits: [
-        "Automatische Extraktion von Indikatoren aus Massendaten",
-        "Abgleich mit bekannten Modus-Operandi-Mustern",
-        "Sprachübergreifende Analyse unter Beibehaltung semantischer Kontexte",
-        "Nachvollziehbare Dokumentation für Beweisführung vor Gericht"
+        "Prozessgraph: Aufgaben, Sequenzfluss und Entscheidungspunkte als verknüpfte Knoten",
+        "Fristen automatisch verknüpft: §17 SGB I (rechtzeitige Erbringung), §84 SGB X (Widerspruchsfrist)",
+        "Chatbot: 'Welche Fristen gelten für die Bearbeitung eines Rentenantrags?' — Antwort zitiert §99, §17, §26",
+        "Export als strukturierte Daten für BPMN-Modellierung (zukünftige Funktion)"
       ],
-      icon: Lock,
-      color: "oklch(0.45 0.12 240)",
-      impact: "178,6 Mrd. € Schaden durch Cyberangriffe in 2024"
+      icon: Workflow,
+      color: "oklch(0.50 0.18 160)",
+      impact: "Prozessoptimierung mit vollständiger Regelabdeckung"
     },
     {
-      title: "Grenzüberschreitende Fahndung",
-      description: "Internationale Zusammenarbeit mit Europol und nationalen Partnerbehörden bei verschlüsselter Kommunikation.",
+      title: "Gesetzesfolgen-Analyse",
+      description: "Impact-Analyse bei Gesetzesänderungen — z. B. 'Was ändert sich durch den neuen §33 für die Erwerbsminderungsrente?' Alle betroffenen Regeln und Prozesse identifizieren.",
       benefits: [
-        "Fuzzy-Logik erkennt verschiedene Schreibweisen und ordnet eindeutig zu",
-        "Zusammenführung von Daten aus unterschiedlichen Systemen und Rechtsräumen",
-        "Sicherstellung der Datenverarbeitung nach nationalen und EU-Rechtsgrundlagen",
-        "Granulare Zugriffssteuerung und vollständige Auditierbarkeit"
+        "Semantische Ähnlichkeitssuche über alle verknüpften Geschäftsregeln",
+        "Automatische Identifikation aller betroffenen Prozesse und Aufgaben",
+        "Ranking der Auswirkungen nach Abhängigkeitsgrad im Graphen",
+        "Chatbot-gestützte Q&A: Gezielte Fragen zur Auswirkung der Änderung"
       ],
-      icon: Handshake,
-      color: "oklch(0.55 0.18 200)",
-      impact: "Über 131.000 Cybercrime-Fälle in Deutschland"
+      icon: GitCompare,
+      color: "oklch(0.55 0.20 55)",
+      impact: "Gesetzesänderungsfolgen in Minuten statt Wochen analysieren"
     },
     {
-      title: "Digital Twin & Standards",
-      description: "Digitaler Zwilling eines Ermittlungsfalls: alle Datenquellen – GPS, Mobilfunk, Finanztransaktionen, Social Media, Computer-Forensik – werden in einem einheitlichen, standardbasierten Wissensmodell aggregiert.",
+      title: "Onboarding & Wissenstransfer",
+      description: "Neue Mitarbeitende verstehen DRV-Zuständigkeiten und Gesetzesgrundlagen — ohne 300+ Seiten Gesetzestext lesen zu müssen.",
       benefits: [
-        "Aggregation aller Quellen (Bank, PayPal, Krypto, OSINT, Mobilfunkdaten, GPS) zu einem ganzheitlichen Fallbild",
-        "Interoperabilität durch ISO 23247, STIX 2.1, ISO 27037/27042 und XPolizei-Standards",
-        "Lückenlose digitale Beweiskette (Chain of Custody) nach BSI IT-Forensik & NIST SP 800-86",
-        "Automatische Erkennung und Korrelation von Transaktionsmustern über Konto-, Krypto- und E-Geld-Netzwerke"
+        "Chatbot erklärt komplexe Sachverhalte in einfacher Sprache mit §-Verweisen",
+        "Navigierbarer Wissensgraph: Von der Übersicht ins Detail durch interaktive Exploration",
+        "GRA-Anweisungen als Handlungsleitfaden direkt verknüpft mit Paragraphen",
+        "Häufige Fragen mit Standardantworten und Quellennachweis — kein Halluzinationsrisiko"
       ],
-      icon: BrainCircuit,
-      color: "oklch(0.55 0.22 170)",
-      impact: "Ganzheitlicher Digital Twin pro Ermittlungsfall"
+      icon: Users,
+      color: "oklch(0.45 0.12 200)",
+      impact: "Einarbeitungszeit von Monaten auf Wochen reduzieren"
+    }
+  ]
+
+  // ────────────────────────────────────────────
+  // Data: Graph RAG vs Vector RAG comparison
+  // ────────────────────────────────────────────
+  const ragComparisons = [
+    {
+      title: "Multi-Hop-Reasoning: Rentenanspruch",
+      question: "Hat Frau Müller (62 Jahre, 38 Beitragsjahre, 3 Kinder geb. 1993, 1996, 1999) Anspruch auf Regelaltersrente?",
+      graphAnswer: {
+        result: "Korrekte Antwort mit vollständiger Begründung",
+        explanation: "Graph RAG traversiert: §35 SGB VI → §50 (Wartezeit ✓: 38 Jahre > 5 Jahre) → §235 (Regelaltersgrenze für Jg. 1964: 67 Jahre → mit 62 noch nicht erreicht) → §56 (Kindererziehungszeiten: 3×36 = 108 Monate zusätzlich). Ergebnis: Noch kein Anspruch, da Altersgrenze nicht erreicht — aber Wartezeit für Altersrente für besonders langjährig Versicherte (45 Jahre) wäre mit KEZ potenziell erfüllt."
+      },
+      vectorAnswer: {
+        result: "Unvollständige oder falsche Antwort",
+        explanation: "Vector RAG findet §35 (Regelaltersrente) per Ähnlichkeitssuche, aber verknüpft nicht automatisch §50 (Wartezeit), §235 (Übergangsregelungen für ihr Geburtsjahr) und §56 (Kindererziehungszeiten). Ohne Graph-Traversierung fehlt die systematische Prüfung aller Voraussetzungen."
+      }
+    },
+    {
+      title: "Gesetzesübergreifende Abhängigkeit",
+      question: "Welche Fristen gelten bei einem abgelehnten Reha-Antrag?",
+      graphAnswer: {
+        result: "Vollständige Fristenkette über 3 Gesetze",
+        explanation: "Graph RAG traversiert: SGB IX §49 (Reha-Leistung) → SGB VI §9 (DRV als Reha-Träger) → SGB X §31 (Bescheid als Verwaltungsakt) → SGB X §84 (Widerspruchsfrist: 1 Monat) → SGG §87 (Klagefrist: 1 Monat nach Widerspruchsbescheid). Liefert die komplette Rechtsmittelkette."
+      },
+      vectorAnswer: {
+        result: "Nur Teilantwort, fehlende Verknüpfung",
+        explanation: "Vector RAG findet Texte zu Rehabilitation, kennt aber nicht den systematischen Pfad über SGB X (Verwaltungsverfahren) zum SGG (Sozialgerichtsgesetz). Widerspruchsfristen stehen in einem anderen Gesetz und werden per Vektorähnlichkeit nicht zuverlässig gefunden."
+      }
+    },
+    {
+      title: "Ausnahmeregel: Vorzeitige Wartezeit",
+      question: "Welche Wartezeit gilt für Erwerbsminderungsrente bei einem Arbeitsunfall?",
+      graphAnswer: {
+        result: "Erkennt die Ausnahme sofort",
+        explanation: "Graph RAG traversiert: §43 SGB VI (EM-Rente, Normalfall: 5 Jahre Wartezeit + 3/5 Pflichtbeiträge) → erkennt verknüpfte Ausnahmeregel §53 SGB VI (vorzeitige Wartezeiterfüllung bei Arbeitsunfall) → Wartezeit gilt als sofort erfüllt. Die Graph-Kante SR_REFERENCES verbindet §43 direkt mit §53."
+      },
+      vectorAnswer: {
+        result: "Gibt nur die Standardregel zurück",
+        explanation: "Vector RAG ruft §43 per Vektorsuche ab (hohe Ähnlichkeit zu 'Erwerbsminderungsrente') und antwortet mit der 5-Jahres-Wartezeit. §53 (vorzeitige Wartezeit bei Arbeitsunfall) hat geringere Vektorähnlichkeit zum Query und wird nicht in den Top-K-Ergebnissen gefunden. Die Ausnahme wird übersehen."
+      }
+    },
+    {
+      title: "Temporale Validität: Regelaltersgrenze",
+      question: "Gilt für einen 1960 Geborenen noch die Altersgrenze 65?",
+      graphAnswer: {
+        result: "Exakte Antwort mit Übergangsregelung",
+        explanation: "Graph RAG traversiert: §35 → §235 SGB VI (Übergangsregelungen) mit temporalen Metadaten → Jahrgang 1960 = 66 Jahre + 4 Monate. Der Graph speichert die stufenweise Anhebung als strukturierte Daten pro Jahrgang und kann die exakte Altersgrenze berechnen."
+      },
+      vectorAnswer: {
+        result: "Gibt generische 67 Jahre an",
+        explanation: "Vector RAG findet allgemeine Texte zur Regelaltersgrenze (67 Jahre), hat aber keine strukturierten temporalen Daten. Die Übergangsregelungen in §235 mit der differenzierten Tabelle pro Geburtsjahrgang werden nicht als zusammenhängende Struktur erfasst. Ergebnis: Falsche Altersgrenze."
+      }
+    }
+  ]
+
+  // ────────────────────────────────────────────
+  // Data: Chat API Standards
+  // ────────────────────────────────────────────
+  const chatApiStandards = [
+    {
+      name: "OpenAI Chat Completions",
+      endpoint: "POST /v1/chat/completions",
+      description: "De-facto-Industriestandard für Chat-KI. messages[]-Array mit Rollen (system, user, assistant). Streaming via SSE.",
+      adoptedBy: "OpenAI, Azure OpenAI, LiteLLM, vLLM, Ollama, Groq, Together AI",
+      color: "#10b981"
+    },
+    {
+      name: "Anthropic Messages API",
+      endpoint: "POST /v1/messages",
+      description: "System-Prompt als separater Top-Level-Parameter. Content-Blocks für multimodales Messaging. Streaming via delta-Events.",
+      adoptedBy: "Anthropic Claude, AWS Bedrock (Claude)",
+      color: "#8b5cf6"
+    },
+    {
+      name: "LangChain / LangServe",
+      endpoint: "POST /invoke, /stream, /batch",
+      description: "Framework-Standard für RAG-Pipelines. Retriever → LLM → Output Parser. Deployment als FastAPI-Service.",
+      adoptedBy: "LangChain, LangGraph, LangSmith",
+      color: "#f59e0b"
+    },
+    {
+      name: "OpenAPI 3.1 / Swagger",
+      endpoint: "GET /openapi.json",
+      description: "API-Beschreibungsstandard. Automatische Swagger-UI und ReDoc-Dokumentation. Client-SDK-Generierung.",
+      adoptedBy: "Universeller Standard — FastAPI, Spring, Express, etc.",
+      color: "#3b82f6"
     }
   ]
 
@@ -239,56 +321,29 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* ── HEADER ── */}
       <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-3">
             <SopraLogo />
             <Separator orientation="vertical" className="h-8 hidden md:block" />
-            <span className="text-sm font-medium text-muted-foreground hidden md:block">CASSA</span>
+            <span className="text-sm font-medium text-muted-foreground hidden md:block">CASSA · DRV</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={() => scrollToSection('architecture')}
-              className="hidden md:flex"
-            >
-              Technologie
+            <Button variant="ghost" size="sm" onClick={() => scrollToSection('architecture')} className="hidden md:flex">
+              Architektur
             </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={() => scrollToSection('scenarios')}
-              className="hidden md:flex"
-            >
-              Praxisszenarien
+            <Button variant="ghost" size="sm" onClick={() => scrollToSection('graph-rag')} className="hidden md:flex">
+              Graph vs Vector RAG
             </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={() => scrollToSection('standards')}
-              className="hidden md:flex"
-            >
-              Standards
+            <Button variant="ghost" size="sm" onClick={() => scrollToSection('chat-api')} className="hidden md:flex">
+              Chat API
             </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={() => scrollToSection('cooperation')}
-              className="hidden md:flex"
-            >
-              Kooperation
+            <Button variant="ghost" size="sm" onClick={() => scrollToSection('scenarios')} className="hidden md:flex">
+              Szenarien
             </Button>
-            <Button 
-              asChild 
-              size="sm"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
-            >
-              <a 
-                href="https://www.soprasteria.de/products/cassa" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
+            <Button asChild size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <a href="https://www.soprasteria.de/products/cassa" target="_blank" rel="noopener noreferrer">
                 Mehr erfahren
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
@@ -297,10 +352,8 @@ function App() {
         </div>
       </header>
 
-      <motion.section 
-        style={{ opacity: heroOpacity }}
-        className="hero-pattern py-32 md:py-40 relative overflow-hidden"
-      >
+      {/* ── HERO ── */}
+      <motion.section style={{ opacity: heroOpacity }} className="hero-pattern py-32 md:py-40 relative overflow-hidden">
         <AnimatedBackground />
         <div className="container mx-auto px-6 max-w-7xl relative z-10">
           <motion.div
@@ -309,23 +362,19 @@ function App() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
               <Badge className="mb-6 bg-accent text-accent-foreground text-base px-4 py-2">
                 <Zap className="h-4 w-4 mr-2" />
-                Neuro-Symbolische KI-Architektur
+                Compliance Knowledge Graph + GraphRAG
               </Badge>
             </motion.div>
             
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-foreground leading-tight">
-              Digitaler Wissens&shy;assistent für die Polizei
+              Digitaler Wissens&shy;assistent für die Renten&shy;versicherung
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed">
-              Wie Multi-Layered Ontologien die Defizite von KI-Sprachmodellen überwinden und moderne Ermittlungsarbeit revolutionieren.
+              Wie ein Knowledge Graph mit GraphRAG die Komplexität des Sozialrechts beherrschbar macht — und warum Vector RAG bei gesetzesübergreifenden Fragen versagt.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -334,12 +383,8 @@ function App() {
                 size="lg" 
                 className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-10 h-14 shadow-lg hover:shadow-xl transition-shadow"
               >
-                <a 
-                  href="https://www.soprasteria.de/products/cassa" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Play className="mr-2 h-5 w-5" />
+                <a href="https://www.soprasteria.de/products/cassa" target="_blank" rel="noopener noreferrer">
+                  <BrainCircuit className="mr-2 h-5 w-5" />
                   CASSA entdecken
                 </a>
               </Button>
@@ -357,6 +402,7 @@ function App() {
         </div>
       </motion.section>
 
+      {/* ── SECTION: Herausforderungen ── */}
       <section id="challenges" className="py-24 bg-muted/30 relative">
         <div className="container mx-auto px-6 max-w-7xl">
           <motion.div
@@ -371,11 +417,11 @@ function App() {
               Schritt 1: Das Problem verstehen
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Die Herausforderungen der modernen Polizeiarbeit
+              Die Herausforderungen der Rentenversicherung
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              320.000 Polizeibeschäftigte in Deutschland stehen vor einem fundamentalen Dilemma: 
-              exponentiell wachsende Datenmengen bei fragmentierter IT-Infrastruktur.
+              56.000 DRV-Beschäftigte verarbeiten jährlich Millionen von Rentenanträgen — auf Basis eines
+              Rechtsrahmens mit über 870 Paragraphen in 5+ Sozialgesetzbüchern.
             </p>
           </motion.div>
 
@@ -399,10 +445,7 @@ function App() {
                           whileHover={{ scale: 1.05, rotate: 5 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
-                          <Icon 
-                            className="h-8 w-8" 
-                            style={{ color: challenge.color }}
-                          />
+                          <Icon className="h-8 w-8" style={{ color: challenge.color }} />
                         </motion.div>
                         <div className="flex-1">
                           <CardTitle className="text-2xl mb-3 group-hover:text-primary transition-colors">
@@ -426,9 +469,7 @@ function App() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {challenge.description}
-                      </p>
+                      <p className="text-muted-foreground leading-relaxed">{challenge.description}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -438,6 +479,7 @@ function App() {
         </div>
       </section>
 
+      {/* ── SECTION: Warum reine LLMs nicht genügen ── */}
       <section className="py-24 bg-card relative">
         <div className="absolute inset-0 bg-destructive/5"></div>
         <div className="container mx-auto px-6 max-w-7xl relative z-10">
@@ -453,29 +495,29 @@ function App() {
               Schritt 2: Warum reine LLMs nicht genügen
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              ChatGPT & Co. für die Polizei ungeeignet
+              ChatGPT & Co. für das Sozialrecht ungeeignet
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Large Language Models sind probabilistisch – Polizeiarbeit ist deterministisch. 
-              Halluzinationen, temporale Blindheit und fehlende Zustandsverwaltung machen reine LLMs unbrauchbar.
+              Large Language Models sind probabilistisch — Rentenberechnung ist deterministisch. 
+              Halluzinierte Paragraphen, fehlende Querverweise und temporale Blindheit machen reine LLMs für die DRV unbrauchbar.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               {
-                title: "Statistische Plausibilität ≠ Logische Validität",
-                description: "Ein halluzinierter Paragraf oder falsche Fristberechnung kann fatale Folgen haben – von Verfahrensverzögerung bis zur Unverwertbarkeit von Beweisen.",
+                title: "Halluzinierte Paragraphen",
+                description: "Ein LLM erfindet plausibel klingende §-Angaben: '§37a SGB VI' existiert nicht, aber ein LLM kann diesen selbstbewusst zitieren. Falsche Rechtsauskunft kann zu fehlerhaften Bescheiden führen.",
                 icon: AlertTriangle
               },
               {
                 title: "Temporale Blindheit",
-                description: "Kein Verständnis für Verjährungsfristen, Gesetzesänderungen oder zeitliche Abhängigkeiten. Kritisch bei Haftprüfungen und TKÜ-Verlängerungen.",
+                description: "Kein Verständnis für Übergangsregelungen: Welche Altersgrenze gilt für Jahrgang 1960? LLMs kennen nicht die stufenweise Anhebung und antworten generisch mit '67 Jahre' — falsch.",
                 icon: Clock
               },
               {
-                title: "Fehlende Zustandsverwaltung",
-                description: "Ermittlungsverfahren sind langfristige State Machines – LLMs haben kein Gedächtnis über Sitzungen hinweg.",
+                title: "Fehlende Querverweise",
+                description: "§43 EM-Rente verweist auf §53 (Ausnahme bei Arbeitsunfall) — LLMs erkennen diese Spezialregel nicht, weil sie Beziehungen zwischen Normen nicht systematisch traversieren können.",
                 icon: Database
               }
             ].map((problem, index) => {
@@ -506,6 +548,7 @@ function App() {
         </div>
       </section>
 
+      {/* ── SECTION: Architektur (4-Layer Ontologie) ── */}
       <section id="architecture" ref={architectureRef} className="py-32 bg-primary/5 network-pattern relative">
         <div className="container mx-auto px-6 max-w-7xl">
           <motion.div
@@ -523,8 +566,8 @@ function App() {
               Multi-Layered Ontologie-Architektur
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-              Structure-Aware Temporal Graph RAG (SAT-Graph RAG) in Neo4j-Graphdatenbank 
-              kombiniert symbolische KI mit LLM-Sprachverarbeitung.
+              Structure-Aware Temporal Graph RAG (SAT-Graph RAG) in Neo4j-Graphdatenbank — 
+              alle Sozialgesetzbücher, Geschäftsregeln und Prozesse als navigierbarer Knowledge Graph.
             </p>
             <p className="text-base text-primary font-semibold">
               👆 Klicken Sie auf die Schichten, um mehr zu erfahren
@@ -557,15 +600,10 @@ function App() {
                           <motion.div 
                             className="p-4 rounded-xl"
                             style={{ backgroundColor: `${layer.color}15` }}
-                            animate={{ 
-                              scale: isSelected ? [1, 1.1, 1] : 1,
-                            }}
+                            animate={{ scale: isSelected ? [1, 1.1, 1] : 1 }}
                             transition={{ duration: 0.5 }}
                           >
-                            <Icon 
-                              className="h-8 w-8" 
-                              style={{ color: layer.color }}
-                            />
+                            <Icon className="h-8 w-8" style={{ color: layer.color }} />
                           </motion.div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
@@ -578,9 +616,7 @@ function App() {
                               </Badge>
                               <CardTitle className="text-xl">{layer.title}</CardTitle>
                             </div>
-                            <p className="text-sm text-muted-foreground font-medium">
-                              {layer.subtitle}
-                            </p>
+                            <p className="text-sm text-muted-foreground font-medium">{layer.subtitle}</p>
                           </div>
                         </div>
                       </CardHeader>
@@ -594,14 +630,10 @@ function App() {
                           >
                             <CardContent className="pt-0">
                               <Separator className="mb-4" />
-                              <p className="text-muted-foreground leading-relaxed mb-4">
-                                {layer.description}
-                              </p>
+                              <p className="text-muted-foreground leading-relaxed mb-4">{layer.description}</p>
                               <div className="flex flex-wrap gap-2">
                                 {layer.examples.map((example, i) => (
-                                  <Badge key={i} variant="secondary" className="text-xs">
-                                    {example}
-                                  </Badge>
+                                  <Badge key={i} variant="secondary" className="text-xs">{example}</Badge>
                                 ))}
                               </div>
                             </CardContent>
@@ -621,54 +653,272 @@ function App() {
               transition={{ duration: 0.6 }}
               className="sticky top-24 h-[700px]"
             >
-              <div className="absolute top-3 left-3 z-10">
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={isPlayingNarration ? "default" : "outline"}
-                        size="sm"
-                        onClick={toggleNarration}
-                        className="gap-2 shadow-lg backdrop-blur-sm bg-background/80 hover:bg-background/90"
-                      >
-                        {isPlayingNarration ? (
-                          <>
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-                            </span>
-                            Briefing läuft …
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4" />
-                            CASSA-Briefing
-                          </>
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      align="start"
-                      className="max-w-xs text-sm leading-relaxed"
-                    >
-                      <p className="font-semibold mb-1">Briefing anhören</p>
-                      <p>
-                        Ausführliches Briefing zum Hydra-Fall: Eine Graphen-Architektur der den Hydra-Market Fall mit 88 Knoten und 113 
-                        Beziehungen zeigt und erklärt, wie Geldwäsche-Netzwerke, Ransomware-Gruppen,
-                        Nachfolgemärkte, Standards und Best Practices. (ca. 8 Min.)
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <PoliceKnowledgeGraph3D />
+              <DRVKnowledgeGraph3D />
             </motion.div>
           </div>
         </div>
       </section>
 
-      <section id="scenarios" className="py-32 bg-background">
+      {/* ── SECTION: Graph RAG vs Vector RAG ── */}
+      <section id="graph-rag" className="py-32 bg-background">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <Badge className="mb-4 text-base px-4 py-2">
+              <GitCompare className="h-4 w-4 mr-2" />
+              Schritt 4: Warum Graph RAG?
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Graph RAG vs. Vector RAG
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Vector RAG findet ähnliche Textpassagen — Graph RAG versteht <strong>Beziehungen</strong> zwischen Normen.
+              Bei gesetzesübergreifenden Fragen versagt Vector RAG systematisch. Hier sind konkrete Beispiele.
+            </p>
+          </motion.div>
+
+          {/* Summary comparison */}
+          <div className="grid md:grid-cols-2 gap-8 mb-16 max-w-5xl mx-auto">
+            <Card className="border-2 border-destructive/30 bg-destructive/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <XCircle className="h-5 w-5 text-destructive" />
+                  Vector RAG — Limitierungen
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  "Findet nur textlich ähnliche Passages — keine strukturellen Verbindungen",
+                  "Übersieht Ausnahmeregeln in anderen Paragraphen (§53 bei §43-Suche)",
+                  "Keine temporalen Metadaten — kann Übergangsregelungen nicht auswerten",
+                  "Kein Multi-Hop: Kann nicht über 3+ Gesetze hinweg Schlüsse ziehen",
+                  "Kein Verständnis für Normenhierarchie oder Vorrang-/Spezialitätsregeln"
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3 text-sm">
+                    <XCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground leading-relaxed">{item}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-green-500/30 bg-green-500/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CircleCheck className="h-5 w-5 text-green-600" />
+                  Graph RAG — Vorteile
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  "Traversiert Gesetz → Paragraph → Regel → Prozess über explizite Kanten",
+                  "Folgt Querverweisen (SR_REFERENCES) und Ausnahmen (SR_DEPENDS_ON)",
+                  "Temporale Metadaten an jedem Knoten — exakte Gültigkeit pro Stichtag",
+                  "Multi-Hop über beliebig viele verknüpfte Gesetze, Regeln und Entitäten",
+                  "Normenhierarchie als Graph-Struktur — automatische Vorrangprüfung"
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3 text-sm">
+                    <CircleCheck className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground leading-relaxed">{item}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Concrete failure examples */}
+          <h3 className="text-2xl font-bold text-center mb-8">Konkrete Beispiele: Wo Vector RAG versagt</h3>
+          <div className="space-y-8 max-w-5xl mx-auto">
+            {ragComparisons.map((comp, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="border-2 hover:shadow-xl transition-shadow overflow-hidden">
+                  <CardHeader className="bg-primary/5">
+                    <div className="flex items-start gap-3">
+                      <Badge variant="outline" className="text-sm font-bold flex-shrink-0">
+                        Beispiel {index + 1}
+                      </Badge>
+                      <div>
+                        <CardTitle className="text-lg mb-2">{comp.title}</CardTitle>
+                        <CardDescription className="text-base">
+                          <span className="font-semibold text-foreground">Frage:</span> '{comp.question}"
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
+                      {/* Graph RAG */}
+                      <div className="p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <CircleCheck className="h-5 w-5 text-green-600" />
+                          <span className="font-bold text-green-700">Graph RAG</span>
+                          <Badge className="bg-green-100 text-green-800 text-xs">{comp.graphAnswer.result}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{comp.graphAnswer.explanation}</p>
+                      </div>
+                      {/* Vector RAG */}
+                      <div className="p-6 bg-destructive/3">
+                        <div className="flex items-center gap-2 mb-3">
+                          <XCircle className="h-5 w-5 text-destructive" />
+                          <span className="font-bold text-destructive">Vector RAG</span>
+                          <Badge className="bg-red-100 text-red-800 text-xs">{comp.vectorAnswer.result}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{comp.vectorAnswer.explanation}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION: Chat API Standards ── */}
+      <section id="chat-api" className="py-32 bg-muted/30 relative">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <Badge className="mb-4 text-base px-4 py-2">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Schritt 5: Chat API Standards
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Chatbot API nach Industriestandards
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              CASSA implementiert die gängigen Chat-API-Standards. Jedes Frontend, jeder Chatbot-Client 
+              kann sich direkt integrieren — OpenAI-kompatibel mit GraphRAG-Erweiterungen.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {chatApiStandards.map((api, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="h-full hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: api.color }} />
+                      <CardTitle className="text-base">{api.name}</CardTitle>
+                    </div>
+                    <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-primary">{api.endpoint}</code>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed">{api.description}</p>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-semibold">Genutzt von:</span> {api.adoptedBy}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* CASSA API Detail */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="border-2 border-primary/30 bg-primary/5 max-w-5xl mx-auto">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Bot className="h-6 w-6 text-primary" />
+                  CASSA Chat API — OpenAI-kompatibel + GraphRAG
+                </CardTitle>
+                <CardDescription>
+                  Die CASSA API folgt dem OpenAI messages[]-Format und erweitert es um Zitationen und Sitzungsverwaltung.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Search className="h-4 w-4" />
+                      POST /api/v1/chat
+                    </h4>
+                    <div className="bg-slate-900 rounded-lg p-4 text-sm font-mono text-slate-300 overflow-x-auto">
+                      <pre>{`{
+  "message": "Welche Voraussetzungen
+    gelten für Altersrente?",
+  "session_id": null,
+  "context": {
+    "gesetz": "SGB VI",
+    "paragraph": "§ 35"
+  },
+  "top_k": 10
+}`}</pre>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Response mit Zitationen
+                    </h4>
+                    <div className="bg-slate-900 rounded-lg p-4 text-sm font-mono text-slate-300 overflow-x-auto">
+                      <pre>{`{
+  "session_id": "a3f1b2c4...",
+  "answer": "Nach § 35 SGB VI haben
+    Versicherte Anspruch auf...",
+  "citations": [{
+    "source": "SGB VI",
+    "core_component": "Regelaltersrente",
+    "br_name": "BR_SGB6_35_01",
+    "score": 0.93
+  }]
+}`}</pre>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-6" />
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[
+                    { label: "POST /api/v1/chat", desc: "Multi-Turn Chat mit Session (Redis, 8h TTL)" },
+                    { label: "POST /api/v1/search", desc: "Single-Turn Search — stateless, keine Session" },
+                    { label: "DELETE /api/v1/chat/{id}", desc: "Session löschen" },
+                    { label: "GET /…/history", desc: "Konversationsverlauf abrufen" },
+                    { label: "GET /docs", desc: "Swagger UI — interaktive API-Dokumentation" },
+                    { label: "GET /health", desc: "Health Check Endpoint" },
+                  ].map((ep, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                      <code className="text-xs font-mono font-semibold text-primary">{ep.label}</code>
+                      <p className="text-xs text-muted-foreground mt-1">{ep.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── SECTION: Praxisszenarien ── */}
+      <section id="scenarios" className="py-32 bg-card">
         <div className="container mx-auto px-6 max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -679,13 +929,13 @@ function App() {
           >
             <Badge className="mb-4 text-base px-4 py-2">
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Schritt 4: Praxis erleben
+              Schritt 6: Praxis erleben
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Praxisszenarien für die Polizei
+              Praxisszenarien für die DRV
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Konkrete Anwendungsfälle zeigen, wie CASSA die tägliche Ermittlungsarbeit unterstützt.
+              Konkrete Anwendungsfälle zeigen, wie CASSA die tägliche Arbeit in der Rentenversicherung unterstützt.
             </p>
           </motion.div>
 
@@ -700,9 +950,7 @@ function App() {
                     className="flex flex-col items-center gap-2 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                   >
                     <Icon className="h-6 w-6" />
-                    <span className="text-xs md:text-sm font-medium text-center leading-tight">
-                      {scenario.title}
-                    </span>
+                    <span className="text-xs md:text-sm font-medium text-center leading-tight">{scenario.title}</span>
                   </TabsTrigger>
                 )
               })}
@@ -726,16 +974,11 @@ function App() {
                             animate={{ rotate: [0, 5, -5, 0] }}
                             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                           >
-                            <Icon 
-                              className="h-12 w-12" 
-                              style={{ color: scenario.color }}
-                            />
+                            <Icon className="h-12 w-12" style={{ color: scenario.color }} />
                           </motion.div>
                           <div className="flex-1">
                             <CardTitle className="text-3xl mb-4">{scenario.title}</CardTitle>
-                            <CardDescription className="text-base leading-relaxed">
-                              {scenario.description}
-                            </CardDescription>
+                            <CardDescription className="text-base leading-relaxed">{scenario.description}</CardDescription>
                             <Badge variant="secondary" className="mt-4">
                               <TrendingUp className="h-3 w-3 mr-1" />
                               {scenario.impact}
@@ -770,7 +1013,7 @@ function App() {
         </div>
       </section>
 
-      {/* ── SECTION: Standards & Normen ── */}
+      {/* ── SECTION: Standards & Compliance ── */}
       <section id="standards" className="py-32 bg-muted/30 relative">
         <div className="container mx-auto px-6 max-w-7xl">
           <motion.div
@@ -782,53 +1025,53 @@ function App() {
           >
             <Badge className="mb-4 text-base px-4 py-2">
               <Scale className="h-4 w-4 mr-2" />
-              Schritt 5: Standards & Compliance
+              Schritt 7: Rechtsgrundlagen
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Welche Standards müssen beachtet werden?
+              Gesetzliche Grundlagen im Knowledge Graph
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Polizeiliche Ermittlungen im digitalen Raum unterliegen einem komplexen Geflecht aus internationalen,
-              europäischen und nationalen Normen. CASSA integriert diese Standards direkt in den Knowledge Graph.
+              Die DRV arbeitet auf Basis eines komplexen Geflechts aus Sozialgesetzbüchern, 
+              EU-Verordnungen und internen Handlungsanweisungen. CASSA bildet sie alle als Graph ab.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             {[
               {
-                icon: Globe,
-                title: "Internationale Standards",
-                color: "oklch(0.55 0.18 200)",
+                icon: BookOpen,
+                title: "Sozialgesetzbücher",
+                color: "oklch(0.45 0.15 245)",
                 standards: [
-                  { name: "STIX 2.1 (OASIS)", desc: "Structured Threat Intelligence eXpression — standardisiertes Format für den Austausch von Cyber-Bedrohungsinformationen zwischen Behörden und Organisationen weltweit" },
-                  { name: "ISO 27037", desc: "Richtlinien zur Identifizierung, Sammlung, Sicherung und Aufbewahrung digitaler Beweismittel — internationale Grundlage der IT-Forensik" },
-                  { name: "ISO 27042", desc: "Analyse und Interpretation digitaler Beweismittel — Sicherstellung der Gerichtsverwertbarkeit" },
-                  { name: "NIST SP 800-86", desc: "Guide to Integrating Forensic Techniques — Best-Practice-Framework des US-Handelsministeriums für digitale Forensik" },
-                  { name: "ISO 23247", desc: "Digital Twin Framework — standardisierte Architektur für digitale Zwillinge, angewandt auf Ermittlungsfälle" }
+                  { name: "SGB VI — Rentenversicherung", desc: "Primärgesetz: ~323 §§ — Beiträge, Leistungen, Alters-/Erwerbsminderungsrente, Rehabilitation" },
+                  { name: "SGB IV — Gemeinsame Vorschriften", desc: "Versicherungspflicht, Beitragsbemessung, Meldeverfahren — Grundlage aller Sozialversicherungen" },
+                  { name: "SGB I — Allgemeiner Teil", desc: "Framework: Leistungsansprüche, Fristen, Zuständigkeiten — gilt übergreifend für alle SGBs" },
+                  { name: "SGB IX — Rehabilitation", desc: "DRV als Reha-Träger — medizinische Rehabilitation und Teilhabe am Arbeitsleben" },
+                  { name: "SGB X — Verwaltungsverfahren", desc: "Verwaltungsakte, Widerspruchsverfahren, Sozialdatenschutz — Verfahrensrecht" },
                 ]
               },
               {
                 icon: Landmark,
-                title: "EU-Recht & Regulierung",
-                color: "oklch(0.45 0.12 240)",
+                title: "EU-Recht & Datenschutz",
+                color: "oklch(0.50 0.18 200)",
                 standards: [
-                  { name: "DSGVO (EU 2016/679)", desc: "Datenschutz-Grundverordnung — Rechtsrahmen für die Verarbeitung personenbezogener Daten, einschl. Recht auf Löschung und Auskunft" },
-                  { name: "NIS2-Richtlinie (EU 2022/2555)", desc: "Cybersicherheits-Richtlinie für kritische Infrastrukturen — Meldepflichten, Risikomanagement, Aufsichtsbefugnisse" },
-                  { name: "EU-Geldwäscherichtlinien (AMLD 5/6)", desc: "Bekämpfung von Geldwäsche und Terrorismusfinanzierung — Know-Your-Customer-Pflichten für Kryptobörsen" },
-                  { name: "Europäische Ermittlungsanordnung (EEA)", desc: "Rechtsinstrument für den gegenseitigen Beweis-Austausch zwischen EU-Mitgliedstaaten innerhalb von 120 Tagen" },
-                  { name: "Prümer Vertrag (EU 2024)", desc: "Automatisierter Abgleich von DNA, Fingerabdrücken, Kfz-Daten und Gesichtsbildern zwischen EU-Polizeibehörden" }
+                  { name: "DSGVO (EU 2016/679)", desc: "Datenschutz-Grundverordnung — Rechtsrahmen für die Verarbeitung personenbezogener Sozialdaten" },
+                  { name: "EU-VO 883/2004", desc: "Koordinierung der Systeme der sozialen Sicherheit — grenzüberschreitende Rentenansprüche" },
+                  { name: "BSI IT-Grundschutz", desc: "IT-Sicherheitsstandard — Pflicht für DRV als Behörde mit kritischer Infrastruktur" },
+                  { name: "AAÜG — Anwartschaftsüberführung", desc: "Post-Vereinigungspension: Überführung von DDR-Rentenanwartschaften" },
+                  { name: "VersAusglG — Versorgungsausgleich", desc: "Scheidungsbedingter Rentenausgleich zwischen Ehepartnern" },
                 ]
               },
               {
-                icon: Shield,
-                title: "Nationale Normen (DE/US)",
-                color: "oklch(0.25 0.05 250)",
+                icon: ScrollText,
+                title: "DRV-Anweisungen (GRA)",
+                color: "oklch(0.55 0.20 55)",
                 standards: [
-                  { name: "XPolizei 2.0", desc: "Deutscher Interoperabilitätsstandard der Polizei — einheitliches Datenaustauschformat zwischen Bundes- und Landespolizeien" },
-                  { name: "StPO (Strafprozessordnung)", desc: "Verfahrensrechtliche Grundlage für Ermittlungen — §100a TKÜ, §100b Online-Durchsuchung, §94 Beschlagnahmung" },
-                  { name: "BSI IT-Forensik-Leitfaden", desc: "Bundesamt für Sicherheit — Leitfaden zur forensischen Sicherung und Analyse digitaler Beweismittel" },
-                  { name: "EO 13694 (US)", desc: "Executive Order zur Blockierung von Eigentum bei bösartigen Cyber-Aktivitäten — Rechtsgrundlage der OFAC-Sanktionen gegen Hydra, Garantex" },
-                  { name: "BVerfG-Urteil 2023", desc: "Verfassungsrechtliche Anforderungen an automatisierte Datenanalyse — Verhältnismäßigkeit, Transparenz, Überprüfbarkeit" }
+                  { name: "GRA SGB VI", desc: "Gemeinsame Rechtliche Anweisungen zur Rentenversicherung — Auslegungshinweise zu allen §§" },
+                  { name: "GRA SGB IV", desc: "Anweisungen zu Versicherungspflicht, Beiträgen und Meldeverfahren" },
+                  { name: "GRA SGB IX", desc: "Anweisungen zur Rehabilitation — DRV als zuständiger Leistungsträger" },
+                  { name: "GRA Fremdrentenrecht", desc: "Spezialanweisungen für ausländische Versicherungszeiten und Spätaussiedler" },
+                  { name: "rvRecht® Portal", desc: "Öffentlich zugängliches DRV-Rechtsportal mit allen GRA — Quelle für CASSA-Import" },
                 ]
               }
             ].map((category, catIndex) => {
@@ -877,10 +1120,10 @@ function App() {
                   <div>
                     <h3 className="text-xl font-bold mb-2">CASSA-Integration</h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Alle genannten Standards sind direkt im Knowledge Graph verankert. Jede Entität trägt STIX-2.1-Typinformationen,
-                      jede Ermittlungsmaßnahme wird automatisch gegen die normative Schicht (StPO, DSGVO, NIS2) validiert,
-                      und die zeitliche Dimension prüft die Anwendbarkeit der jeweiligen Gesetzesfassung zum Tatzeitpunkt.
-                      XPolizei-2.0-Typisierungen ermöglichen den nahtlosen Datenaustausch zwischen Bundes- und Landespolizeien.
+                      Alle genannten Gesetze und Anweisungen sind direkt im Knowledge Graph verankert. 
+                      Jeder Paragraph enthält seine Geschäftsregeln, jede Regel verweist auf die relevanten Prozesse und Entitäten.
+                      Die zeitliche Dimension speichert die Gültigkeit jeder Fassung — von der Übergangsregelung bis zur aktuellen Rentenanpassung.
+                      GRA-Anweisungen des rvRecht®-Portals sind als eigene Knotentypen verknüpft und liefern praxisnahe Auslegungshinweise.
                     </p>
                   </div>
                 </div>
@@ -890,8 +1133,8 @@ function App() {
         </div>
       </section>
 
-      {/* ── SECTION: Ermittlungs-Best-Practices ── */}
-      <section id="bestpractices" className="py-32 bg-card relative">
+      {/* ── SECTION: Graph-Architektur im Detail ── */}
+      <section id="graph-detail" className="py-32 bg-card relative">
         <div className="container mx-auto px-6 max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -901,273 +1144,68 @@ function App() {
             className="text-center mb-16"
           >
             <Badge className="mb-4 text-base px-4 py-2">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Schritt 6: Best Practices
+              <Layers className="h-4 w-4 mr-2" />
+              Schritt 8: Graph-Architektur
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ermittlungs-Best-Practices
+              Knowledge Graph — Datenmodell
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Bewährte Methoden der digitalen Ermittlungsarbeit — systematisch, rechtskonform und gerichtsverwertbar.
+              Die vollständige DRV-Graphstruktur: von Gesetzen über Geschäftsregeln bis zu Prozessen und Entitäten.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                icon: Fingerprint,
-                title: "Digitale Beweissicherung (Chain of Custody)",
-                color: "oklch(0.55 0.22 25)",
-                practices: [
-                  "Kryptographische Hashwerte (SHA-256) bei jeder Sicherung — lückenloser Nachweis der Unverändertheit",
-                  "Write-Blocker bei forensischen Kopien — Originalbeweise niemals direkt verändern",
-                  "Vier-Augen-Prinzip bei Beschlagnahmung und Auswertung digitaler Asservate",
-                  "Vollständige Protokollierung aller Zugriffe mit Zeitstempo, Person und Zweck (Audit Trail)",
-                  "ISO 27037-konforme Dokumentation — vom Auffinden bis zur Vorlage vor Gericht"
-                ]
-              },
-              {
-                icon: Network,
-                title: "Blockchain-Forensik & Kryptoanalyse",
-                color: "oklch(0.45 0.12 240)",
-                practices: [
-                  "Cluster-Analyse zur Identifikation zusammengehöriger Wallet-Adressen (Heuristiken: Common-Input, Change-Address)",
-                  "Cross-Chain-Tracking bei Mixer-/Bridge-Transaktionen — z.B. Hydras Bitcoin Bank Mixer",
-                  "Korrelation von On-Chain-Daten mit Off-Chain-Informationen (KYC-Daten, IP-Adressen, Forum-Accounts)",
-                  "OFAC SDN-Listen-Abgleich — automatische Flagging sanktionierter Adressen (>100 Hydra-Adressen)",
-                  "Zeitliche Muster-Erkennung: Transaktionszeitpunkte korreliert mit realen Ereignissen"
-                ]
-              },
-              {
-                icon: ScrollText,
-                title: "Strukturierte Ermittlungsführung",
-                color: "oklch(0.25 0.05 250)",
-                practices: [
-                  "Ermittlungshypothesen formal im Knowledge Graph modellieren und systematisch verifizieren/falsifizieren",
-                  "Proaktives Fristenmanagement — automatische Warnung vor Verjährung, Haftprüfung, TKÜ-Verlängerung",
-                  "Ermittlungsverfahren als Zustandsmaschine: definierte Übergänge von Vorermittlung → Hauptermittlung → Anklage",
-                  "Aktenzeichen-basierte Verknüpfung aller Beweismittel, Beschlüsse und Protokolle",
-                  "Regelmäßige Ermittlungsreviews mit Graph-gestützter Lagedarstellung"
-                ]
-              },
-              {
-                icon: Workflow,
-                title: "KI-gestützte Analyse & Qualitätssicherung",
-                color: "oklch(0.55 0.18 200)",
-                practices: [
-                  "Neuro-symbolischer Ansatz: LLM-Sprachverarbeitung + deterministische Graph-Validierung = keine Halluzinationen",
-                  "Automatische Anonymisierung personenbezogener Daten nach DSGVO-Vorgaben bei Datenexport",
-                  "BVerfG-konforme automatisierte Datenanalyse: Verhältnismäßigkeit, Transparenz und Nachvollziehbarkeit",
-                  "Entity Resolution: Fuzzy-Matching erkennt verschiedene Schreibweisen derselben Person/Organisation",
-                  "Automatisierte Plausibilitätsprüfung: Graph-Algorithmen identifizieren Widersprüche und Lücken"
-                ]
-              }
-            ].map((bp, bpIndex) => {
-              const BpIcon = bp.icon
-              return (
-                <motion.div
-                  key={bpIndex}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: bpIndex * 0.1 }}
-                >
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl" style={{ backgroundColor: `${bp.color}15` }}>
-                          <BpIcon className="h-7 w-7" style={{ color: bp.color }} />
-                        </div>
-                        <CardTitle className="text-lg">{bp.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {bp.practices.map((practice, i) => (
-                          <li key={i} className="flex gap-3 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                            <span className="text-muted-foreground leading-relaxed">{practice}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )
-            })}
+          <div className="max-w-4xl mx-auto">
+            <Card className="border-2 bg-slate-900 text-slate-200 overflow-hidden">
+              <CardContent className="p-8">
+                <pre className="text-sm font-mono leading-relaxed overflow-x-auto whitespace-pre">
+{`CT_LAW (5–9 Gesetze: SGB I, IV, VI, IX, X, AAÜG, FRG, VersAusglG, BetrAVG)
+ └─[SR_CONTAINS]─► S_SECTION (~1.000 Paragraphen)
+      └─[SR_CONTAINS]─► S_CORE_COMPONENT (~2.500 Kernkomponenten)
+           ├─[SR_DEFINES]─► S_BUSINESS_RULE (~800 Geschäftsregeln)
+           │    └─[SR_REALIZED_BY]─► S_PROCESS (~200 Prozesse)
+           │         ├─[SR_SUPPORTS]─► S_GOAL
+           │         └─[SR_COMPOSED_OF]─► S_TASK
+           └─[SR_ASSOCIATES]─► S_ENT_* (~2.000 Entitäten)
+                z.B. S_ENT_PERSON, S_ENT_BUSINESS_OBJECT,
+                     S_ENT_DEADLINE, S_ENT_MONEY_AMOUNT
+
+GRA_INSTRUCTION ──[SR_INSTRUCTS]──► S_SECTION
+STANDARD        ──[SR_APPLIES_TO]─► S_PROCESS
+CHAT_API        ──[SR_COMPATIBLE]─► CHAT_API`}
+                </pre>
+              </CardContent>
+            </Card>
+
+            <div className="grid md:grid-cols-3 gap-4 mt-8">
+              {[
+                { label: "~4.500+", desc: "Knoten im vollständigen Graph", icon: Database },
+                { label: "~8.000+", desc: "Beziehungen zwischen Knoten", icon: Network },
+                { label: "5+ SGBs", desc: "Verknüpfte Gesetze mit Querverweisen", icon: Link2 },
+              ].map((stat, i) => {
+                const StatIcon = stat.icon
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                  >
+                    <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+                      <StatIcon className="h-8 w-8 text-primary mx-auto mb-3" />
+                      <div className="text-3xl font-bold text-primary mb-1">{stat.label}</div>
+                      <div className="text-sm text-muted-foreground">{stat.desc}</div>
+                    </Card>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION: Grenzüberschreitende Zusammenarbeit ── */}
-      <section id="cooperation" className="py-32 bg-primary/5 relative">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <Badge className="mb-4 text-base px-4 py-2">
-              <Globe className="h-4 w-4 mr-2" />
-              Schritt 7: Internationale Kooperation
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Grenzüberschreitende Zusammenarbeit
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Moderne Kriminalität kennt keine Grenzen. Die Zerschlagung von Hydra Market zeigt:
-              Nur das koordinierte Zusammenwirken internationaler Behörden führt zum Erfolg.
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
-            {[
-              {
-                title: "Operation Hydra: Das Modell",
-                icon: Network,
-                color: "oklch(0.55 0.22 25)",
-                description: "Die Zerschlagung von Hydra Market am 5. April 2022 ist ein Musterbeispiel für erfolgreiche internationale Kooperation.",
-                facts: [
-                  { label: "Federführung", value: "BKA (Deutschland) + ZIT Frankfurt" },
-                  { label: "US-Partner", value: "DOJ, FBI, DEA, IRS-CI, HSI, USPIS (JCODE)" },
-                  { label: "Sanktionen", value: "OFAC – >100 Krypto-Adressen auf SDN-Liste" },
-                  { label: "Russische Justiz", value: "Moskauer Regionalgericht – Lebenslänglich" },
-                  { label: "Estland", value: "FIU – Garantex-Lizenzentzug Feb 2022" },
-                  { label: "Ergebnis", value: "543,3 BTC beschlagnahmt, Tagesumsatz –89%" }
-                ]
-              },
-              {
-                title: "Institutionelle Rahmenwerke",
-                icon: Landmark,
-                color: "oklch(0.45 0.12 240)",
-                description: "Formale Kooperationsmechanismen ermöglichen den rechtssicheren Informationsaustausch über Grenzen hinweg.",
-                facts: [
-                  { label: "Europol / EC3", value: "Europäisches Cybercrime Centre – Analyse, Koordination, J-CAT" },
-                  { label: "Eurojust", value: "Justizielle Zusammenarbeit – Joint Investigation Teams (JITs)" },
-                  { label: "MLATs", value: "Bilaterale Rechtshilfeabkommen – z.B. DE-US, DE-RU" },
-                  { label: "JCODE (USA)", value: "Joint Criminal Opioid & Darknet Enforcement – FBI, DEA, IRS-CI" },
-                  { label: "Interpol I-24/7", value: "Globales Polizei-Kommunikationsnetzwerk – 195 Länder" },
-                  { label: "Five Eyes + ", value: "Nachrichtendienstlicher Austausch – UK, US, CA, AU, NZ + Partner" }
-                ]
-              },
-              {
-                title: "Technische Interoperabilität",
-                icon: Database,
-                color: "oklch(0.55 0.18 200)",
-                description: "Standardisierte Datenformate und sichere Austauschkanäle sind die technische Basis jeder Kooperation.",
-                facts: [
-                  { label: "STIX/TAXII", value: "Automatisierter Echtzeit-Austausch von Threat Intelligence" },
-                  { label: "SIENA", value: "Europols Secure Information Exchange Network" },
-                  { label: "Prümer Vertrag", value: "Automatischer DNA-, Fingerabdruck- und Kfz-Abgleich (EU)" },
-                  { label: "XPolizei 2.0", value: "Interoperabilität der 16+1 deutschen Polizeien" },
-                  { label: "Blockchain Analytics", value: "Chainalysis, Elliptic, TRM Labs – gemeinsame Werkzeuge" },
-                  { label: "CASSA Knowledge Graph", value: "Föderierter Graph – jede Behörde behält Datenhoheit" }
-                ]
-              }
-            ].map((pillar, pIndex) => {
-              const PillarIcon = pillar.icon
-              return (
-                <motion.div
-                  key={pIndex}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: pIndex * 0.15 }}
-                >
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
-                    <CardHeader>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-3 rounded-xl" style={{ backgroundColor: `${pillar.color}15` }}>
-                          <PillarIcon className="h-7 w-7" style={{ color: pillar.color }} />
-                        </div>
-                        <CardTitle className="text-lg">{pillar.title}</CardTitle>
-                      </div>
-                      <CardDescription className="text-sm leading-relaxed">
-                        {pillar.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {pillar.facts.map((fact, i) => (
-                          <div key={i} className="flex gap-3 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                            <Badge variant="outline" className="text-[10px] flex-shrink-0 h-fit mt-0.5 whitespace-nowrap">
-                              {fact.label}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground leading-relaxed">{fact.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="h-full border-2 border-accent/30 bg-accent/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Handshake className="h-5 w-5 text-accent" />
-                    Lessons Learned: Hydra Market
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    "Parallel ermitteln, koordiniert zuschlagen: BKA beschlagnahmte Server am selben Tag, an dem OFAC Sanktionen verhängte und DOJ die Anklage veröffentlichte",
-                    "Verschiedene Rechtssysteme nutzen: Deutsches Strafrecht für Server-Beschlagnahmung, US-Sanktionsrecht für Kryptobörsen, russisches Strafrecht für Betreiber",
-                    "Blockchain-Forensik als Brücke: On-Chain-Daten sind jurisdiktionsübergreifend verfügbar und bieten objektive Beweismittel",
-                    "Timing ist entscheidend: Estlands Lizenzentzug (Feb), BKA-Zugriff (Apr), OFAC-Sanktionen (Apr) — orchestrierte Eskalation"
-                  ].map((lesson, i) => (
-                    <div key={i} className="flex gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground leading-relaxed">{lesson}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="h-full border-2 border-primary/30 bg-primary/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <BrainCircuit className="h-5 w-5 text-primary" />
-                    CASSA als Kooperationsplattform
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    "Föderierter Knowledge Graph: Jede Behörde behält Datenhoheit (Data Sovereignty), teilt aber Erkenntnisse über standardisierte STIX-2.1-Schnittstellen",
-                    "Granulare Zugriffssteuerung (ABAC): Rollenbasierte und attributbasierte Freigabe — vom einzelnen Knoten bis zur Ermittlungsgruppe",
-                    "Vollständige Auditierbarkeit: Jeder Zugriff, jede Abfrage, jeder Datenexport wird unveränderlich protokolliert",
-                    "Multi-jurisdiktionale Normprüfung: Automatische Validierung von Maßnahmen gegen die jeweiligen nationalen Rechtsgrundlagen aller beteiligten Staaten"
-                  ].map((feature, i) => (
-                    <div key={i} className="flex gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground leading-relaxed">{feature}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
+      {/* ── CTA ── */}
       <section className="py-32 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 network-pattern"></div>
@@ -1180,11 +1218,11 @@ function App() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
-              Bereit für die Zeitenwende in der inneren Sicherheit?
+              Bereit für den digitalen Wissensassistenten?
             </h2>
             <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-12 leading-relaxed">
-              Erfahren Sie mehr über CASSA und wie neuro-symbolische KI-Architektur 
-              Ihre Ermittlungsarbeit unterstützen kann – datenschutzkonform und rechtsstaatlich.
+              Erfahren Sie mehr über CASSA und wie ein Knowledge Graph mit GraphRAG 
+              die Komplexität des Sozialrechts beherrschbar macht — rechtskonform und transparent.
             </p>
             <Button 
               asChild 
@@ -1192,11 +1230,7 @@ function App() {
               variant="secondary"
               className="text-lg px-12 h-16 text-primary font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
             >
-              <a 
-                href="https://www.soprasteria.de/products/cassa" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
+              <a href="https://www.soprasteria.de/products/cassa" target="_blank" rel="noopener noreferrer">
                 Zur offiziellen CASSA-Website
                 <ArrowRight className="ml-3 h-6 w-6" />
               </a>
@@ -1205,6 +1239,7 @@ function App() {
         </div>
       </section>
 
+      {/* ── FOOTER ── */}
       <footer className="py-12 border-t border-border bg-muted/30">
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -1213,7 +1248,7 @@ function App() {
             </div>
             <div className="flex flex-col md:flex-row items-center gap-4">
               <p className="text-sm text-muted-foreground text-center">
-                © 2024 Sopra Steria. Alle Rechte vorbehalten.
+                © 2025 Sopra Steria. Alle Rechte vorbehalten.
               </p>
               <a
                 href="https://www.soprasteria.de/footer/impressum"
@@ -1230,6 +1265,8 @@ function App() {
     </div>
   )
 }
+
+// ── Helper Components ──
 
 function SopraLogo() {
   return (

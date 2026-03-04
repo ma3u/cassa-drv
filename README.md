@@ -1,38 +1,37 @@
-# 🔒 CASSA — Polizeilicher Knowledge Graph
+# 📋 CASSA DRV — Digitaler Wissensassistent für die Rentenversicherung
 
-**Computer-Aided Structured Security Analysis** — Interaktive 3D-Visualisierung eines polizeilichen Wissensgrafen am Beispiel der **Operation Hydra** (Zerschlagung des weltweit größten Darknet-Marktplatzes).
+**Compliance-Assured Structured Semantic Analysis** für die Deutsche Rentenversicherung — Interaktive 3D-Visualisierung eines Sozialrecht-Knowledge-Graphs mit GraphRAG und Chat-API.
 
-> **[▶ Live-App öffnen](https://ma3u.github.io/cassa/)**
+> **[▶ Live-App öffnen](https://ma3u.github.io/cassa-drv/)**
 
-![Entitäten](https://img.shields.io/badge/Entitäten-88-blue) ![Beziehungen](https://img.shields.io/badge/Beziehungen-113-green) ![STIX 2.1](https://img.shields.io/badge/STIX-2.1-orange) ![XPolizei](https://img.shields.io/badge/XPolizei-2.0-red)
+![Knoten](https://img.shields.io/badge/Knoten-65+-blue) ![Beziehungen](https://img.shields.io/badge/Beziehungen-90+-green) ![SGB](https://img.shields.io/badge/SGB-5%2B-orange) ![Chat API](https://img.shields.io/badge/Chat_API-OpenAI--kompatibel-brightgreen)
 
 ---
 
-## Was ist CASSA?
+## Was ist CASSA DRV?
 
-CASSA demonstriert, wie ein **Knowledge Graph** komplexe, grenzüberschreitende Ermittlungsfälle strukturiert darstellen kann. Das Projekt zeigt die **Multi-Layered Ontologie-Architektur** mit vier Schichten:
+CASSA demonstriert, wie ein **Knowledge Graph** mit **GraphRAG** die Komplexität des Sozialrechts beherrschbar macht. Das Projekt zeigt die **Multi-Layered Ontologie-Architektur** für die Deutsche Rentenversicherung:
 
 | Schicht | Name | Beschreibung |
 |---------|------|-------------|
-| 1 | **Normative Schicht** | Hierarchie der Rechtsquellen — EU-Recht, Grundgesetz, StPO, Landespolizeigesetze |
-| 2 | **Zeitliche Dimension** | Versionierung und Gültigkeitsprüfung von Gesetzesfassungen, Fristen, Verjährung |
-| 3 | **Prozedurale Zustandsmaschine** | Ermittlungsverfahren als formale Prozesse mit Zuständen und Übergängen |
-| 4 | **Fallbezogener Overlay** | Konkrete Fakten: Personen, Beweismittel, Transaktionen, Kommunikationsdaten |
+| 1 | **Normative Schicht** | Hierarchie der Rechtsquellen — EU-Recht, SGB I–XII, Rechtsverordnungen, GRA |
+| 2 | **Zeitliche Dimension** | Übergangsregelungen (§235 SGB VI), Rentenanpassungen, stufenweise Anhebungen |
+| 3 | **Prozedurale Schicht** | DRV-Geschäftsprozesse: Rentenantrag, EM-Prüfung, Reha, Widerspruchsverfahren |
+| 4 | **Fallbezogener Overlay** | Versichertendaten: Entgeltpunkte, Wartezeiten, Gutachten, Bescheide |
 
 ## Features
 
-- **Interaktiver 3D-Knowledge-Graph** — 88 Entitäten, 113 Beziehungen, 18 Knotentypen mit Force-Directed Layout
-- **Detailpanel** — Klick auf jeden Knoten zeigt Ermittlungsdetails, Verbindungsstatistik, Quellen
-- **Relationen-Labels** — Beziehungstypen direkt auf den Kanten sichtbar
-- **Polizei-Briefing** — ElevenLabs-generierte Sprachausgabe (deutsche Männerstimme „Lucius")
-- **Standards-Sektion** — STIX 2.1, ISO 27037/27042, NIST 800-86, DSGVO, NIS2, XPolizei 2.0
-- **Best Practices** — Chain of Custody, Blockchain-Forensik, strukturierte Ermittlungsführung
-- **Grenzüberschreitende Kooperation** — Europol, JCODE, Eurojust, MLATs, Interpol
-- **Responsive Design** — Dark Mode, optimiert für Desktop und Tablet
+- **Interaktiver 3D-Knowledge-Graph** — 65+ Knoten, 90+ Beziehungen, 10 Knotentypen (Gesetze, Paragraphen, Regeln, Prozesse, Entitäten, GRA, Chat-API-Standards)
+- **Graph RAG vs. Vector RAG** — 4 konkrete Beispiele, wo Vector RAG bei gesetzesübergreifenden Fragen versagt
+- **Chat-API nach Industriestandards** — OpenAI-kompatible API mit GraphRAG-Erweiterungen (Zitationen, Sessions)
+- **Praxisszenarien** — Compliance-Analyse, Prozess-Engineering, Gesetzesfolgen-Analyse, Onboarding
+- **Detailpanel** — Klick auf jeden Knoten zeigt Paragraphendetails, Geschäftsregeln, Querverweise
+- **Standards & Compliance** — SGB I/IV/VI/IX/X, DSGVO, BSI IT-Grundschutz, GRA-Anweisungen
+- **Responsive Design** — Optimiert für Desktop und Tablet
 
 ---
 
-## Tech Stack
+## tech Stack
 
 | Technologie | Version | Zweck |
 |-------------|---------|-------|
@@ -44,7 +43,6 @@ CASSA demonstriert, wie ein **Knowledge Graph** komplexe, grenzüberschreitende 
 | react-force-graph-3d | 1.29 | 3D-Graph-Visualisierung |
 | three.js | 0.175 | WebGL-Rendering |
 | framer-motion | 12.6 | Animationen |
-| ElevenLabs API | v1 | Text-to-Speech (Buildzeit) |
 
 ---
 
@@ -52,211 +50,75 @@ CASSA demonstriert, wie ein **Knowledge Graph** komplexe, grenzüberschreitende 
 
 ```bash
 # Repository klonen
-git clone https://github.com/ma3u/cassa.git
-cd cassa
+git clone https://github.com/ma3u/cassa-drv.git
+cd cassa-drv
 
-# Dependencies installieren
+# Abhängigkeiten installieren
 npm ci
 
-# Entwicklungsserver starten (Port 5000)
+# Entwicklungsserver starten
 npm run dev
-
-# Produktions-Build erstellen
-npm run build
-
-# Linting
-npm run lint
 ```
 
-> **Voraussetzung:** Node.js 22+
+Öffne [http://localhost:5173/cassa-drv/](http://localhost:5173/cassa-drv/) im Browser.
+
+## Build & Deploy
+
+```bash
+npm run build     # Produktions-Build → dist/
+npm run preview   # Vorschau des Builds
+npm run lint      # ESLint
+```
+
+### GitHub Pages
+
+Das Projekt wird automatisch via GitHub Actions deployed:
+- Push auf `main` → Build → Deploy auf GitHub Pages
+- URL: `https://ma3u.github.io/cassa-drv/`
+
+---
+
+## Graph RAG vs. Vector RAG
+
+Die Landing Page zeigt 4 konkrete Beispiele, wo Vector RAG versagt:
+
+| Beispiel | Problem bei Vector RAG | Graph RAG Lösung |
+|----------|----------------------|-----------------|
+| **Multi-Hop Rentenanspruch** | Verknüpft nicht §35 → §50 → §235 → §56 | Traversiert alle relevanten Paragraphen |
+| **Gesetzesübergreifende Fristen** | Findet Reha-Fristen nicht in SGB X | Folgt Querverweisen über 3 Gesetze |
+| **Ausnahmeregel §53** | Übersieht vorzeitige Wartezeiterfüllung | Erkennt Ausnahme via Graph-Kante |
+| **Temporale Altersgrenze** | Gibt generisch 67 Jahre an | Hat strukturierte Übergangstabelle |
+
+## Chat API
+
+CASSA implementiert eine OpenAI-kompatible Chat-API:
+
+```
+POST /api/v1/chat        # Multi-Turn Chat mit Session
+POST /api/v1/search       # Single-Turn Search (stateless)
+GET  /api/v1/chat/{id}/history  # Konversationsverlauf
+DELETE /api/v1/chat/{id}  # Session löschen
+GET  /docs                # Swagger UI
+GET  /health              # Health Check
+```
 
 ---
 
 ## Projektstruktur
 
 ```
-├── src/
-│   ├── App.tsx                          # Haupt-SPA (~1271 Zeilen) — alle Sektionen + Narration
-│   ├── components/
-│   │   ├── PoliceKnowledgeGraph3D.tsx   # 3D-Knowledge-Graph (~1050 Zeilen)
-│   │   └── ui/                          # 45 shadcn/ui-Komponenten
-│   ├── hooks/use-mobile.ts              # useIsMobile() Hook
-│   ├── lib/utils.ts                     # cn() Hilfsfunktion (clsx + tailwind-merge)
-│   ├── styles/theme.css                 # Radix-Farbskalen, Spark-Theme-Variablen
-│   ├── main.css                         # Tailwind v4 Entry, Design-Tokens
-│   └── index.css                        # oklch-Farben, Hero-Pattern, Network-Pattern
-├── input/                               # Quelldaten für den Graphen
-│   ├── hydra_graph_data (1).json        # Angereicherte Daten (88 Knoten, 113 Relationen)
-│   ├── hydra_graph_data.json            # Originaldaten
-│   ├── hydra_neo4j_import*.cypher       # Neo4j-Import-Skripte
-│   ├── hydra_nodes*.csv                 # Knoten-CSVs
-│   └── hydra_relationships*.csv         # Relationen-CSVs
-├── public/audio/
-│   └── hydra_briefing.mp3              # ElevenLabs-Narration (Lucius-Stimme, deutsch)
-├── scripts/                            # Python-Hilfsskripte
-│   ├── find_voices.py                  # ElevenLabs-Stimmensuche
-│   ├── generate_narration.py           # Audio-Generierung (Lucius, eleven_multilingual_v2)
-│   ├── generate_hydra_voice.py         # Erweiterte TTS-Generierung
-│   └── generate_graph_code.py          # JSON → TypeScript buildCaseData()-Konvertierung
-├── .github/
-│   ├── copilot-instructions.md         # Projekt-Richtlinien für GitHub Copilot
-│   ├── dependabot.yml                  # Dependabot-Konfiguration
-│   └── workflows/deploy.yml           # GitHub Pages Deployment (Node 22)
-├── check-console.mjs                  # Playwright: Konsolen-Fehler-Logger
-├── test-graph.mjs                     # Playwright: Headless-Screenshot + Pixelanalyse
-├── vite.config.ts                     # Vite: base '/cassa/', Plugins, Path-Alias
-└── tsconfig.json                      # TypeScript: ES2020, strictNullChecks, bundler
+src/
+├── App.tsx                           # Haupt-SPA mit allen Sektionen
+├── components/
+│   ├── DRVKnowledgeGraph3D.tsx       # 3D-Graph (65+ Knoten, Sozialrecht)
+│   └── ui/                           # 45 shadcn/ui-Komponenten
+├── hooks/use-mobile.ts               # Mobile-Breakpoint-Hook
+├── lib/utils.ts                      # cn() Utility
+├── main.css                          # Tailwind v4, Design-Tokens
+├── index.css                         # DRV-Farbschema (oklch)
+└── styles/theme.css                  # Radix-Farbskalen
 ```
-
----
-
-## Wichtige Dateien und Funktionen
-
-### `src/App.tsx` — Haupt-Applikation
-
-Die Single-Page-App enthält alle scroll-basierten Sektionen:
-
-| Sektion | Beschreibung |
-|---------|-------------|
-| **Hero** | Landing mit animiertem Hintergrund und Intro-Guide |
-| **Architektur** | 4-Schichten-Ontologie-Modell (interaktiv auswählbar) |
-| **Features** | 6 Feature-Cards mit Animationen |
-| **Knowledge Graph** | Eingebettete `PoliceKnowledgeGraph3D`-Komponente |
-| **Praxisszenarien** | 4 Ermittlungsszenarien als Tabs |
-| **Standards & Compliance** | 15 Standards in 3 Kategorien (International, EU, National) |
-| **Best Practices** | 4 Kategorien mit 20 Ermittlungs-Best-Practices |
-| **Grenzüberschreitende Kooperation** | 3 Säulen + Lessons Learned |
-| **CTA** | Call-to-Action und Kontakt |
-
-**Schlüsselfunktionen:**
-- `toggleNarration()` — Startet/stoppt die ElevenLabs-Audio-Narration
-- `scrollToSection(id)` — Smooth-Scroll zur jeweiligen Sektion
-- State: `selectedLayer`, `activeScenario`, `showIntroGuide`, `isPlayingNarration`
-
-### `src/components/PoliceKnowledgeGraph3D.tsx` — 3D-Knowledge-Graph
-
-Die Kernkomponente des Projekts mit self-contained Daten und Rendering:
-
-**18 Knotentypen:**
-```
-suspect · victim · witness · case · evidence · location · communication
-law · organization · account · vehicle · weapon · drug · digital
-regulation · process · sop · anzeige
-```
-
-**Schlüsselfunktionen:**
-- `buildCaseData()` — Erzeugt alle 88 Knoten und 113 Relationen mit deutschen Ermittlungsdetails
-- `nodeThreeObject()` — Custom 3D-Rendering jedes Knotens (Sphäre + Label)
-- `linkThreeObject()` — Relationstyp-Labels auf allen Kanten
-- `onNodeClick()` / `onNodeHover()` — Interaktion: Selektion und Highlighting
-- `navigateToNode()` — Kamera-Animation zu einem Knoten
-- `renderGroup()` — Kategorisierte Beziehungsdarstellung im Detailpanel
-
-**Datenstruktur:**
-```typescript
-interface GraphNode {
-  id: string; label: string; type: NodeType; description: string
-  details?: Record<string, string>  // z.B. { 'Nationalität': 'Russisch', 'Urteil': 'Lebenslänglich' }
-  timestamp?: string; score?: number
-}
-interface GraphLink {
-  source: string; target: string; type: string; description?: string
-}
-```
-
-**Konfigurationsobjekte:**
-- `NODE_COLORS` — oklch-Farben pro Knotentyp
-- `NODE_LABELS` — Emoji + deutscher Label pro Typ (z.B. `🔴 Verdächtiger`)
-- `SOURCE_REGISTRY` — Quellen-URLs pro Knoten-ID
-
-### `input/hydra_graph_data (1).json` — Angereicherte Quelldaten
-
-88 Knoten und 113 Relationen mit:
-- `sources[]` — Quellenreferenzen (OFAC, BKA, DOJ, Chainalysis, Elliptic, TRM Labs, Gwern)
-- `stix_type` — STIX 2.1 SDO-Mapping (z.B. `threat-actor`, `infrastructure`)
-- `xpolizei_type` — XPolizei 2.0 Typ-Mapping
-- `applicable_standards[]` — ISO 27037, ISO 27042, NIST 800-86, EO 13694
-
-### `scripts/generate_narration.py` — Audio-Generierung
-
-Generiert das Polizei-Briefing per ElevenLabs REST API:
-- **Stimme:** Lucius (deep, male, old, German)
-- **Modell:** `eleven_multilingual_v2`
-- **Output:** `public/audio/hydra_briefing.mp3`
-- **Benötigt:** `ELEVENLABS_API_KEY` in `.env`
-
-### `scripts/generate_graph_code.py` — JSON→TypeScript-Konvertierung
-
-Liest die angereicherte JSON-Datei und generiert TypeScript-Code für `buildCaseData()`.
-
----
-
-## Datenmodell
-
-### 88 Entitäten (Knoten)
-
-| Typ | Anzahl | Beispiele |
-|-----|--------|----------|
-| Verdächtige | 10 | Stanislav Moiseyev, Dmitry Pavlov, DarkSide, Conti |
-| Organisationen | 13 | BKA, OFAC, FBI, OMG Market, Sinaloa-Kartell |
-| Konten/Börsen | 6 | Garantex, SUEX, CHATEX, Bitpapa |
-| Prozesse/Events | 13 | Hydra-Gründung, Seizure, OFAC-Sanktionen |
-| Gesetze | 3 | Moskauer Regionalgericht, EO 13694 |
-| Digitale Assets | 6 | Bitcoin-Mixer, Tor-Netzwerk, Ransomware-as-a-Service |
-| Standorte | 14 | Russland, Deutschland, USA, Federation Tower |
-| Dienste | 12 | Drogenverkauf, Dead-Drop, Treuhand, Streitbeilegung |
-| Fälle | 2 | Hydra Market, AlphaBay |
-| Weitere | 9 | Beweismittel, Opfer, Zeugen, Regulierung |
-
-### 113 Beziehungen (Kanten)
-
-Beziehungstypen u.a.: `betrieb`, `ermittelt_gegen`, `sanktionierte`, `nutzt_für_geldwäsche`, `operiert_von`, `beschlagnahmte`, `verurteilte`, `nachfolger_von`
-
----
-
-## Deployment
-
-Das Projekt wird automatisch über **GitHub Actions** auf **GitHub Pages** deployt:
-
-1. Push auf `main` → `.github/workflows/deploy.yml` triggert
-2. `npm ci` → `npm run build` → `dist/` wird deployt
-3. Erreichbar unter: **https://ma3u.github.io/cassa/**
-
----
-
-## Umgebungsvariablen
-
-| Variable | Datei | Zweck |
-|----------|-------|-------|
-| `ELEVENLABS_API_KEY` | `.env` | ElevenLabs TTS API-Key (nur für `scripts/*.py`) |
-
-> `.env` ist in `.gitignore` — niemals API-Keys committen.
-
----
-
-## Standards & Normen
-
-Das Projekt integriert folgende Standards für polizeiliche Ermittlungsarbeit:
-
-- **STIX 2.1** (OASIS) — Structured Threat Intelligence eXpression
-- **XPolizei 2.0** — Deutscher Polizei-Interoperabilitätsstandard
-- **ISO 27037** — Digitale Beweissicherung
-- **ISO 27042** — Analyse digitaler Beweismittel
-- **NIST SP 800-86** — Forensische Techniken
-- **EO 13694** — US-Sanktionsgrundlage für Cyber-Aktivitäten
-- **DSGVO** — Datenschutz-Grundverordnung
-- **NIS2** — EU-Cybersicherheitsrichtlinie
-- **StPO** — Deutsche Strafprozessordnung
-
----
-
-## Sicherheit
-
-- Alle Falldaten sind **fiktiv** — Adressen mit `XXX` geschwärzt, Aktenzeichen erfunden
-- Sicherheitslücken bitte über `opensource-security@github.com` melden
-- DSGVO/NIS2-Referenzen sind rechtlich korrekt
-- API-Keys werden nur zur Buildzeit verwendet, nicht zur Laufzeit
 
 ## Lizenz
 
-MIT License — siehe [LICENSE](LICENSE)
+[MIT](LICENSE)
